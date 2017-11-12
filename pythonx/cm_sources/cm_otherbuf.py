@@ -17,7 +17,7 @@ logger = getLogger(__name__)
 class Source(Base):
 
     class BufferData:
-        __sltos__ = ('changed', 'changedtick', 'deleted', 'words')
+        __slots__ = ('changed', 'changedtick', 'deleted', 'words')
 
         def __init__(self):
             self.changed = False
