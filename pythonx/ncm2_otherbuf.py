@@ -29,6 +29,7 @@ class Source(Ncm2Source):
 
     def __init__(self, nvim):
         super().__init__(nvim)
+        self.active_bufnr = None
         self.buffers = dict()
         self.update()
 
@@ -61,15 +62,6 @@ class Source(Ncm2Source):
         logger.info('keyword refresh complete, count: %s', len(result.words))
         return result
 
-    def on_event(self, event, bufnr):
-        logger.info('Received event %s for buffer %s', event, bufnr)
-        if event == 'BufLeave':
-            buf = self.buffers[bufnr]
-            buf.changed = True
-
-        if event in ('BufAdd', 'BufDelete', 'BufLeave'):
-            self.update()
-
     def on_complete(self, ctx):
         base = ctx['base']
         matcher = self.matcher_get(ctx['matcher'])
@@ -82,8 +74,18 @@ class Source(Ncm2Source):
                         matches.append(item)
         self.complete(ctx, ctx['startccol'], matches)
 
+    def on_warmup(self, ctx):
+        bufnr = ctx['bufnr']
+        logger.info('warmstarting for buffer %s', bufnr)
+
+        if self.active_bufnr is not None:
+            self.buffers[self.active_bufnr].changed = True
+        self.active_bufnr = bufnr
+
+        self.update()
+
 
 source = Source(vim)
 
 on_complete = source.on_complete
-on_event = source.on_event
+on_warmup = source.on_warmup
