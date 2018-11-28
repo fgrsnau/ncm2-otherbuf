@@ -79,7 +79,11 @@ class Source(Ncm2Source):
         logger.info('warmstarting for buffer %s', bufnr)
 
         if self.active_bufnr is not None:
-            self.buffers[self.active_bufnr].changed = True
+            buf = self.buffers.get(self.active_bufnr)
+            if buf:
+                buf.changed = True
+            else:
+                logger.debug('did not find last active buffer %s in my buffer list', self.active_bufnr)
         self.active_bufnr = bufnr
 
         self.update()
