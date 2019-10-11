@@ -3,6 +3,8 @@ if get(s:, 'loaded', 0)
 endif
 let s:loaded = 1
 
+echomsg 'Please update the ncm2-otherbuf repo to use the master branch.'
+
 let g:ncm2_otherbuf#proc = yarp#py3({
     \ 'module': 'ncm2_otherbuf',
     \ 'on_load': { -> ncm2#set_ready(g:ncm2_otherbuf#source)}
