@@ -33,14 +33,22 @@ class Source(Ncm2Source):
         self.buffers = dict()
         self.update()
 
+    def buffer_is_managed(self, buf):
+        return vim.eval('buflisted({})'.format(buf.number))
+
+    def buffer_needs_update(self, buf):
+        is_new = not buf.number in self.buffers
+        has_changed = not is_new and self.buffers[buf.number].changed
+        return is_new or has_changed
+
     def update(self):
         buffers_present = set()
 
         for buf in self.nvim.buffers:
-            schedule_update = (not buf.number in self.buffers) or (self.buffers[buf.number].changed)
-            if schedule_update:
-                self.buffers[buf.number] = self.rescan_buffer(buf)
-            buffers_present.add(buf.number)
+            if self.buffer_is_managed(buf):
+                if self.buffer_needs_update(buf):
+                    self.buffers[buf.number] = self.rescan_buffer(buf)
+                buffers_present.add(buf.number)
 
         self.buffers = {k: v for k, v in self.buffers.items() if k in buffers_present}
 
